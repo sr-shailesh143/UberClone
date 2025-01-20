@@ -21,8 +21,8 @@ module.exports.authUser = async (req, res, next) => {
             return res.status(401).json({ message: 'Unauthorized: User not found' });
         }
 
-        req.user = user; // Attach user to request
-        next(); // Proceed to the next middleware/handler
+        req.user = user; 
+        next(); 
     } catch (err) {
         console.log('Error verifying token:', err);
         return res.status(401).json({ message: 'Unauthorized: Invalid token' });

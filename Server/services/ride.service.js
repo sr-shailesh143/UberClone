@@ -2,20 +2,18 @@ const rideModel = require('../models/ride.model');
 const mapService = require('./maps.service');
 const crypto = require('crypto');
 
-// Utility to generate OTP
 function generateOtp(length) {
     return crypto.randomInt(Math.pow(10, length - 1), Math.pow(10, length)).toString();
 }
 
-// Method to calculate fare based on pickup and destination
 async function calculateFare(pickup = "Default Pickup", destination = "Default Destination") {
     if (!pickup || !destination) {
         throw new Error('Pickup and destination are required');
     }
 
     const distanceTime = await mapService.getDistanceTime(pickup, destination) || {
-        distance: { value: 10000 }, // Default distance: 10 km
-        duration: { value: 1800 },  // Default duration: 30 minutes
+        distance: { value: 10000 }, 
+        duration: { value: 1800 },  
     };
 
     const baseFare = { auto: 30, car: 50, moto: 20 };
@@ -41,7 +39,6 @@ async function calculateFare(pickup = "Default Pickup", destination = "Default D
     };
 }
 
-// Service Methods
 module.exports = {
     async initiateRide({ passenger = "Default Passenger", pickup = "Default Pickup", destination = "Default Destination" }) {
         if (!passenger || !pickup || !destination) {

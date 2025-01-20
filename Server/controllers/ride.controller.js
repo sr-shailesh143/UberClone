@@ -3,26 +3,22 @@ const mongoose = require('mongoose');
 const MapsService = require('../services/maps.service');
 const { sendMessageToSocketId } = require('../socket');
 const rideService = require('../services/ride.service');
-const Ride = require('../models/ride.model'); // Import the Ride model
+const Ride = require('../models/ride.model'); 
 
-/**
- * Initiate a new ride
- */
+
 module.exports.initiateRide = async (req, res) => {
     try {
         const { otp, fare, user, pickup, destination } = req.body;
 
-        // Provide default data if required fields are missing
         const rideData = {
-            otp: otp || Math.floor(100000 + Math.random() * 900000), // Generate a random 6-digit OTP if not provided
-            fare: fare || 50, // Default fare
-            user: user?._id || new mongoose.Types.ObjectId(), // Use user's ObjectId or generate a dummy ObjectId
+            otp: otp || Math.floor(100000 + Math.random() * 900000), 
+            fare: fare || 50,
+            user: user?._id || new mongoose.Types.ObjectId(), 
             pickup: pickup || 'ctm',
             destination: destination || 'vastral',
-            status: 'pending', // Ensure this matches a valid enum value in your schema
+            status: 'pending', 
         };
 
-        // Create the ride document using the populated data
         const newRide = new Ride(rideData);
         await newRide.save();
 
@@ -39,9 +35,7 @@ module.exports.initiateRide = async (req, res) => {
     }
 };
 
-/**
- * Calculate fare for a ride
- */
+
 module.exports.calculateFare = async (req, res) => {
     const validationIssues = validationResult(req);
     if (!validationIssues.isEmpty()) {
@@ -63,9 +57,7 @@ module.exports.calculateFare = async (req, res) => {
     }
 };
 
-/**
- * Accept a ride request
- */
+
 module.exports.acceptRide = async (req, res) => {
     const validationIssues = validationResult(req);
     if (!validationIssues.isEmpty()) {
@@ -93,9 +85,7 @@ module.exports.acceptRide = async (req, res) => {
     }
 };
 
-/**
- * Start a ride
- */
+
 module.exports.beginRide = async (req, res) => {
     const validationIssues = validationResult(req);
     if (!validationIssues.isEmpty()) {
@@ -123,9 +113,7 @@ module.exports.beginRide = async (req, res) => {
     }
 };
 
-/**
- * Complete a ride
- */
+
 module.exports.completeRide = async (req, res) => {
     const validationIssues = validationResult(req);
     if (!validationIssues.isEmpty()) {
