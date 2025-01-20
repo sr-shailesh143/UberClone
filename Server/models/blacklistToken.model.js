@@ -9,8 +9,11 @@ const blacklistTokenSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now,
-        expires: 86400 
+        expires: 86400 // expires in 1 day
     }
 });
 
-module.exports = mongoose.model('BlacklistToken', blacklistTokenSchema);
+// Use mongoose.models to prevent overwriting the model
+const BlacklistToken = mongoose.models.BlacklistToken || mongoose.model('BlacklistToken', blacklistTokenSchema);
+
+module.exports = BlacklistToken;

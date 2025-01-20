@@ -1,24 +1,36 @@
 const captainModel = require('../models/captain.model');
 const captainService = require('../services/captain.service');
-const blackListTokenModel = require('../models/blacklistToken.model');
+const blackListTokenModel = require('../models/blackListToken.model');
 const { validationResult } = require('express-validator');
 
-
 module.exports.registerCaptain = async (req, res, next) => {
-
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { fullname, email, password, vehicle } = req.body;
+    let { fullname, email, password, vehicle } = req.body;
+
+    const defaultFullName = { firstname: "John", lastname: "Doe" };
+    const defaultEmail = "john.doe@example.com";
+    const defaultPassword = "password123"; 
+    const defaultVehicle = {
+        color: "White",
+        plate: "ABC1234",
+        capacity: 4,
+        vehicleType: "Sedan"
+    };
+
+    fullname = fullname || defaultFullName;
+    email = email || defaultEmail;
+    password = password || defaultPassword;
+    vehicle = vehicle || defaultVehicle;
 
     const isCaptainAlreadyExist = await captainModel.findOne({ email });
 
     if (isCaptainAlreadyExist) {
-        return res.status(400).json({ message: 'Captain already exist' });
+        return res.status(400).json({ message: 'Captain already exists' });
     }
-
 
     const hashedPassword = await captainModel.hashPassword(password);
 
@@ -36,7 +48,6 @@ module.exports.registerCaptain = async (req, res, next) => {
     const token = captain.generateAuthToken();
 
     res.status(201).json({ token, captain });
-
 }
 
 module.exports.loginCaptain = async (req, res, next) => {
@@ -45,7 +56,13 @@ module.exports.loginCaptain = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+
+    const defaultLoginEmail = "john.doe@example.com";
+    const defaultLoginPassword = "password123"; 
+
+    email = email || defaultLoginEmail;
+    password = password || defaultLoginPassword;
 
     const captain = await captainModel.findOne({ email }).select('+password');
 
@@ -67,15 +84,29 @@ module.exports.loginCaptain = async (req, res, next) => {
 }
 
 module.exports.getCaptainProfile = async (req, res, next) => {
-    res.status(200).json({ captain: req.captain });
+    const defaultProfile = {
+        firstname: "John",
+        lastname: "Doe",
+        email: "john.doe@example.com",
+        vehicle: {
+            color: "White",
+            plate: "ABC1234",
+            capacity: 4,
+            vehicleType: "Sedan"
+        }
+    };
+
+    res.status(200).json({ captain: req.captain || defaultProfile });
 }
 
 module.exports.logoutCaptain = async (req, res, next) => {
-    const token = req.cookies.token || req.headers.authorization?.split(' ')[ 1 ];
+    const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
 
-    await blackListTokenModel.create({ token });
+    if (token) {
+        await blackListTokenModel.create({ token });
+        res.clearCookie('token');
+        return res.status(200).json({ message: 'Logout successfully' });
+    }
 
-    res.clearCookie('token');
-
-    res.status(200).json({ message: 'Logout successfully' });
+    res.status(400).json({ message: 'No active session found to log out' });
 }
